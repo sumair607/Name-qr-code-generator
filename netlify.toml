@@ -1,0 +1,11 @@
+[build]
+  publish = "."
+  command = "echo 'Static site ready'"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[build.environment]
+  PYTHON_VERSION = "3.11"
