@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .tab.active {
+            background: #2196f3;
+            color: white;
+        }
+        .tab:hover:not(.active) {
+            background: rgba(33, 150, 243, 0.1);
+        }
+        .content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0 0 10px 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .generator {
+            text-align: center;
+        }
+        h1 {
+            color: #1976d2;
+            margin-bottom: 30px;
+        }
+        input {
+            padding: 15px;
+            width: 90%;
+            max-width: 300px;
+            margin: 10px;
+            border: 2px solid #e3f2fd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+        button {
+            padding: 15px 30px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #1976d2;
+            transform: translateY(-2px);
+        }
+        #downloadBtn {
+            background: #4caf50;
+        }
+        #downloadBtn:hover {
+            background: #45a049;
+        }
+        .color-option {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .color-option input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        .color-selection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .color-selection select {
+            padding: 8px 15px;
+            border: 2px solid #e3f2fd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+        .color-option-black::before { content: '●'; color: #000000; }
+        .color-option-blue::before { content: '●'; color: #1976d2; }
+        .color-option-pink::before { content: '●'; color: #e91e63; }
+        .color-option-green::before { content: '●'; color: #4caf50; }
+        .color-option-orange::before { content: '●'; color: #ff9800; }
+        .color-option-purple::before { content: '●'; color: #9c27b0; }
+        .color-option-red::before { content: '●'; color: #f44336; }
+        .color-option-cyan::before { content: '●'; color: #00bcd4; }
+        #qr {
+            margin: 20px 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .about {
+            line-height: 1.6;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(33, 150, 243, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+        }
+        .highlight {
+            background: rgba(33, 150, 243, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+            text-align: center;
+        }
+        ul, ol {
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        li {
+            margin: 8px 0;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            .content {
+                padding: 20px;
+            }
+            .tab {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('generator')">🎯 Generator</button>
+            <button class="tab" onclick="showTab('about')">ℹ️ About</button>
+        </div>
+        
+        <div class="content">
+            <div id="generator" class="tab-content active">
+                <div class="generator">
+                    <h1>QR Code Generator</h1>
+                    
+                    <input type="text" id="text" placeholder="Enter text or URL">
+                    
+                    <div class="color-option">
+                        <input type="checkbox" id="colorful">
+                        <label for="colorful">Generate Colorful QR Code</label>
+                    </div>
+                    
+                    <div class="color-selection" id="colorSelection" style="display: none; margin: 15px 0;">
+                        <label for="colorPicker">Choose Color: </label>
+                        <select id="colorPicker">
+                            <option value="000000,ffffff">⚫ Black (Default)</option>
+                            <option value="1976d2,e3f2fd">🔵 Blue</option>
+                            <option value="e91e63,fce4ec">🟣 Pink</option>
+                            <option value="4caf50,e8f5e8">🟢 Green</option>
+                            <option value="ff9800,fff3e0">🟠 Orange</option>
+                            <option value="9c27b0,f3e5f5">🟣 Purple</option>
+                            <option value="f44336,ffebee">🔴 Red</option>
+                            <option value="00bcd4,e0f2f1">🔵 Cyan</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <button onclick="generateQR()">Generate QR Code</button>
+                        <button id="downloadBtn" onclick="downloadQR()" style="display: none;">Download QR Code</button>
+                    </div>
+                    
+                    <div id="qr">
+                        <p style="color: #666; font-style: italic;">Enter your text above to generate QR code</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="about" class="tab-content">
+                <div class="about">
+                    <h1>About QR Code Generator</h1>
+                    
+                    <div class="section">
+                        <h2>🚀 Why Choose Our QR Generator?</h2>
+                        <div class="highlight">
+                            Instant • Private • Free • No Limits
+                        </div>
+                        <ul>
+                            <li><strong>No Registration Required</strong> - Start generating immediately</li>
+                            <li><strong>100% Privacy</strong> - No data stored or tracked</li>
+                            <li><strong>Mobile Optimized</strong> - Works perfectly on phones</li>
+                            <li><strong>Unlimited Generation</strong> - Create as many as you need</li>
+                            <li><strong>High Quality</strong> - Crystal clear QR codes</li>
+                            <li><strong>8 Color Options</strong> - Choose your preferred color scheme</li>
+                            <li><strong>Instant Download</strong> - Save QR codes directly to device</li>
+                            <li><strong>Tab Interface</strong> - Easy navigation between sections</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h2>📱 How to Use</h2>
+                        <ol>
+                            <li>Enter your text, URL, or message in the input box</li>
+                            <li>Check "Colorful QR Code" to enable color options</li>
+                            <li>Choose your preferred color from 8 available options</li>
+                            <li>Click "Generate QR Code" button</li>
+                            <li>Your QR code appears instantly</li>
+                            <li>Click "Download QR Code" to save it directly</li>
+                        </ol>
+                    </div>
+
+                    <div class="section">
+                        <h2>🎨 Available Colors</h2>
+                        <ul>
+                            <li><strong>⚫ Black</strong> - Classic default option</li>
+                            <li><strong>🔵 Blue</strong> - Professional and trustworthy</li>
+                            <li><strong>🩷 Pink</strong> - Creative and friendly</li>
+                            <li><strong>🟢 Green</strong> - Natural and eco-friendly</li>
+                            <li><strong>🟠 Orange</strong> - Energetic and vibrant</li>
+                            <li><strong>🟣 Purple</strong> - Luxury and premium</li>
+                            <li><strong>🔴 Red</strong> - Bold and attention-grabbing</li>
+                            <li><strong>🩵 Cyan</strong> - Modern and tech-savvy</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h2>💡 QR Code Benefits</h2>
+                        <ul>
+                            <li><strong>Instant Access</strong> - No typing required</li>
+                            <li><strong>Contactless Sharing</strong> - Perfect for hygiene</li>
+                            <li><strong>Universal</strong> - Works on any smartphone</li>
+                            <li><strong>Versatile</strong> - URLs, text, contact info, WiFi passwords</li>
+                            <li><strong>Marketing Power</strong> - Bridge offline to online</li>
+                            <li><strong>Eye-catching</strong> - Colorful QR codes attract more scans</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h2>🎯 Perfect For</h2>
+                        <ul>
+                            <li>Restaurant menus and ordering</li>
+                            <li>Business cards and networking</li>
+                            <li>Event tickets and check-ins</li>
+                            <li>Social media links</li>
+                            <li>Marketing campaigns</li>
+                            <li>Contact details sharing</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h2>⚖️ Disclaimer</h2>
+                        <p>This QR code generator is provided "as is" for general use. Users are responsible for the content they encode. We do not store or monitor generated content. QR codes are created using reliable third-party APIs. For commercial use, please ensure compliance with your local regulations.</p>
+                    </div>
+
+                    <div class="section">
+                        <h2>👨💻 About the Owner</h2>
+                        <p>Created by a passionate developer focused on building simple, useful tools that solve everyday problems. Our mission is to provide free, privacy-focused utilities that work seamlessly across all devices.</p>
+                        <p><strong>Rights Reserved:</strong> This QR generator tool and its design are the intellectual property of the owner. While free to use, redistribution or commercial use of the code requires permission.</p>
+                        <p><strong>Contact:</strong> For suggestions, support, or licensing inquiries, reach out through our website.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentQRUrl = '';
+        
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        function generateQR() {
+            const text = document.getElementById('text').value;
+            if (!text) return alert('Please enter text');
+            
+            const isColorful = document.getElementById('colorful').checked;
+            
+            if (isColorful) {
+                const selectedColors = document.getElementById('colorPicker').value.split(',');
+                const color = selectedColors[0];
+                const bgcolor = selectedColors[1];
+                currentQRUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}&color=${color}&bgcolor=${bgcolor}`;
+            } else {
+                // Standard black and white
+                currentQRUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`;
+            }
+            
+            const qr = document.getElementById('qr');
+            qr.innerHTML = `<img src="${currentQRUrl}" alt="QR Code">`;
+            
+            document.getElementById('downloadBtn').style.display = 'inline-block';
+        }
+        
+        // Show/hide color selection
+        document.getElementById('colorful').addEventListener('change', function() {
+            const colorSelection = document.getElementById('colorSelection');
+            colorSelection.style.display = this.checked ? 'flex' : 'none';
+        });
+        
+        async function downloadQR() {
+            if (!currentQRUrl) return;
+            
+            try {
+                const response = await fetch(currentQRUrl);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'qrcode.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                alert('Download failed. Please try again.');
+            }
+        }
+        
+        // Generate on Enter key
+        document.getElementById('text').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') generateQR();
+        });
+    </script>
+</body>
+</html>
